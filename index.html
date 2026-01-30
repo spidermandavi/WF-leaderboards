@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>World Front Leaderboards</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>World Front Leaderboards</h1>
+    <p>Live Lichess team ratings (updated every ~5 minutes)</p>
+  </header>
+
+  <nav>
+    <select id="variantSelect"></select>
+  </nav>
+
+  <main>
+    <table id="leaderboard">
+      <thead>
+        <tr id="thead">
+          <!-- Headers are inserted dynamically -->
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div id="updated"></div>
+  </main>
+
+  <script>
+    const variants = [
+      {name:"Antichess", file:"antichess.json"},
+      {name:"Atomic", file:"atomic.json"},
+      {name:"King of the Hill", file:"kingOfTheHill.json"},
+      {name:"Racing Kings", file:"racingKings.json"},
+      {name:"Chess 960", file:"chess960.json"},
+      {name:"Three-Check", file:"threeCheck.json"},
+      {name:"Crazyhouse", file:"crazyhouse.json"},
+      {name:"World Chess Official", file:"worldChessOfficial.json"}
+    ];
+
+    const select = document.getElementById("variantSelect");
+    variants.forEach(v => {
+      const option = document.createElement("option");
+      option.value = v.file;
+      option.textContent = v.name;
+      select.appendChild(option);
+    });
+
+    select.addEventListener("change", () => loadLeaderboard(select.value));
+    loadLeaderboard(variants[0].file);
+
+    async function loadLeaderboard(file) {
+      try {
+        const res = await fetch(`data/leaderboards/${file}`);
+        const data = await res.json();
+        const tbody = document.querySelector("#leaderboard tbody");
+        tbody.innerHTML = "";
+
+        const thead = document.querySelector("#thead");
+        thead.innerHTML = "";
+        if (file === "worldChessOfficial.json") {
+          ["#", "Username", "Best Variant", "Best Rating", "Rank", "Best Rank"].forEach(h => {
+            const th = document.createElement("th");
+            th.textContent = h;
+            thead.appendChild(th);
+          });
+        } else {
+          ["#", "Username", "Rating", "Peak Rating", "Rank", "Best Rank"].forEach(h => {
+            const th = document.createElement("th");
+            th.textContent = h;
+            thead.appendChild(th);
+          });
+        }
+
+        data.players.forEach((p, index) => {
+          const tr = document.createElement("tr");
+          if (file === "worldChessOfficial.json") {
+            tr.innerHTML = `
+              <td>${index+1}</td>
+              <td>${p.username}</td>
+              <td>${p.bestVariant}</td>
+              <td>${p.bestRating}</td>
+              <td>${p.rank}</td>
+              <td>${p.bestRank}</td>
+            `;
+          } else {
+            tr.innerHTML = `
+              <td>${index+1}</td>
+              <td>${p.username}</td>
+              <td>${p.rating}</td>
+              <td>${p.peakRating}</td>
+              <td>${p.rank}</td>
+              <td>${p.bestRank}</td>
+            `;
+          }
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById("updated").textContent =
+          "Last updated: " + new Date(data.lastUpdated).toLocaleString();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
