@@ -55,3 +55,24 @@ tr:nth-child(even) {
   font-size: 0.9rem;
   color: #555;
 }
+/* Spinner row centered in table */
+.spinner-row {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+/* Spinner animation */
+.spinner {
+  border: 6px solid #f3f3f3; /* light grey */
+  border-top: 6px solid #003366; /* dark blue */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  margin: auto;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
